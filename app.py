@@ -1,5 +1,5 @@
 from config import SCENE_HEIGHT, SCENE_WIDTH, WINDOW_WIDTH, WINDOW_HEIGHT, MAP_WIDTH, MAP_HEIGHT, RED, GREY, CROSSHAIR_LENGTH, CROSSHAIR_WIDTH, CROSSHAIR_COLOUR
-from raycasting import Player
+from player import Player
 from map import Map
 import pygame
 import math
@@ -45,10 +45,16 @@ def draw_sky(window):
     pygame.draw.rect(window, (26, 164, 255), (MAP_WIDTH, 0, SCENE_WIDTH, SCENE_HEIGHT / 2))
     # pygame.draw.rect(window, (0, 255, 0), (MAP_WIDTH, SCENE_HEIGHT / 2, SCENE_WIDTH, SCENE_HEIGHT / 2))
 
+
 def draw_ui(window):
     # Draw crosshair
     pygame.draw.rect(window, CROSSHAIR_COLOUR, (MAP_WIDTH + SCENE_WIDTH / 2 - CROSSHAIR_WIDTH / 2, SCENE_HEIGHT / 2 - CROSSHAIR_LENGTH / 2, CROSSHAIR_WIDTH, CROSSHAIR_LENGTH))
     pygame.draw.rect(window, CROSSHAIR_COLOUR, (MAP_WIDTH + SCENE_WIDTH / 2 - CROSSHAIR_LENGTH / 2, SCENE_HEIGHT / 2 - CROSSHAIR_WIDTH / 2, CROSSHAIR_LENGTH, CROSSHAIR_WIDTH))
+
+    # Draw pistol
+    pistol = pygame.image.load('images/pistol.png')
+    window.blit(pistol, (MAP_WIDTH + SCENE_WIDTH - 300, SCENE_HEIGHT - 320))
+
 
 def draw_window(window, game_map, user):
     window.fill(GREY)
@@ -61,7 +67,7 @@ def draw_window(window, game_map, user):
     pygame.display.update()
 
 
-def keyboard_input(player, map):
+def keyboard_input(window, map, player, animation_frames):
     keys = pygame.key.get_pressed()
 
     # Player movement
@@ -94,6 +100,13 @@ def keyboard_input(player, map):
     if keys[pygame.K_RIGHT]:
         player.rotate(0.05)
 
+    # Player shoot
+    if keys[pygame.K_SPACE]:
+        animation_frames["gun_blast"] = 360
+    if animation_frames["gun_blast"] > 0:
+        player.shoot(window)
+        animation_frames["gun_blast"] -= 1
+
 
 def init():
     pygame.init()
@@ -102,6 +115,10 @@ def init():
 
     user = Player(100, 100, RED)
     game_map = Map(map)
+    
+    animation_frames = {
+    "gun_blast": 0
+    }
 
     run = True
     while run:
@@ -109,8 +126,8 @@ def init():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 run = False
-        keyboard_input(user, game_map)
         draw_window(window, game_map, user)
+        keyboard_input(window, game_map, user, animation_frames)
         
 
 if __name__ == "__main__":
