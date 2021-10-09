@@ -1,6 +1,7 @@
-from config import SCENE_HEIGHT, SCENE_WIDTH, WINDOW_WIDTH, WINDOW_HEIGHT, MAP_WIDTH, MAP_HEIGHT, RED, GREY, CROSSHAIR_LENGTH, CROSSHAIR_WIDTH, CROSSHAIR_COLOUR
+from config import SCENE_HEIGHT, SCENE_WIDTH, WINDOW_WIDTH, WINDOW_HEIGHT, MAP_WIDTH, MAP_HEIGHT, GREEN, GREY, CROSSHAIR_LENGTH, CROSSHAIR_WIDTH, CROSSHAIR_COLOUR, ENEMY_NUM
 from player import Player
 from map import Map
+from enemy import Enemy
 import pygame
 import math
 from math_tools import Vector2D
@@ -8,7 +9,6 @@ from math_tools import Vector2D
 # ==== GLOBAL VARIABLES ====
 CLOCK = pygame.time.Clock()
 FPS = 60
-
 
 # ===== MAP =====
 # map = [
@@ -41,6 +41,14 @@ map = [
     [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
 ]
 
+def generate_enemies():
+    enemies = []
+    for enemy in range(ENEMY_NUM):
+        enemies.append(Enemy(500, 300))
+
+    return enemies
+
+
 def draw_sky(window):
     pygame.draw.rect(window, (26, 164, 255), (MAP_WIDTH, 0, SCENE_WIDTH, SCENE_HEIGHT / 2))
     # pygame.draw.rect(window, (0, 255, 0), (MAP_WIDTH, SCENE_HEIGHT / 2, SCENE_WIDTH, SCENE_HEIGHT / 2))
@@ -56,18 +64,22 @@ def draw_ui(window):
     window.blit(pistol, (MAP_WIDTH + SCENE_WIDTH - 300, SCENE_HEIGHT - 320))
 
 
-def draw_window(window, game_map, user):
+def draw_window(window, game_map, user, enemies):
     window.fill(GREY)
     draw_sky(window)
     game_map.draw_map(window)
     user.draw(window, game_map)
+
     user.draw_scene_walls(window, game_map)
+    for enemy in enemies:
+        enemy.draw_on_map(window, user)
+        enemy.draw_on_scene(window, user)
     draw_ui(window)
     
-    pygame.display.update()
+    # pygame.display.update()
 
 
-def keyboard_input(window, map, player, animation_frames):
+def keyboard_input(window, map, player, enemies, animation_frames):
     keys = pygame.key.get_pressed()
 
     # Player movement
@@ -96,15 +108,15 @@ def keyboard_input(window, map, player, animation_frames):
 
     # Player rotation
     if keys[pygame.K_LEFT]:
-        player.rotate(-0.05)
+        player.rotate(-0.01)
     if keys[pygame.K_RIGHT]:
-        player.rotate(0.05)
+        player.rotate(0.01)
 
     # Player shoot
     if keys[pygame.K_SPACE]:
-        animation_frames["gun_blast"] = 360
+        animation_frames["gun_blast"] = 1
     if animation_frames["gun_blast"] > 0:
-        player.shoot(window)
+        player.shoot(window, enemies)
         animation_frames["gun_blast"] -= 1
 
 
@@ -113,8 +125,9 @@ def init():
     window = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
     pygame.key.set_repeat(1, 100)
 
-    user = Player(100, 100, RED)
-    game_map = Map(map)
+    user = Player(100, 100, GREEN)  # Create player
+    game_map = Map(map)  # Create Map
+    enemies = generate_enemies()
     
     animation_frames = {
     "gun_blast": 0
@@ -126,8 +139,9 @@ def init():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 run = False
-        draw_window(window, game_map, user)
-        keyboard_input(window, game_map, user, animation_frames)
+        draw_window(window, game_map, user, enemies)
+        keyboard_input(window, game_map, user, enemies, animation_frames)
+        pygame.display.update()
         
 
 if __name__ == "__main__":

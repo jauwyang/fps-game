@@ -1,13 +1,14 @@
 from math_tools import Vector2D, distance
 import math
 import pygame
-from config import WHITE, BLUE
+from config import FOV, RED, WHITE, BLUE
 
 
 class Ray:
     def __init__(self, pos, angle):
         self.pos = pos
         self.angle = angle
+        self.length = 0
         self.dir = Vector2D(math.cos(angle), math.sin(angle))  # direction is relative to the origin
         while self.angle >= 2 * math.pi:
             self.angle -= 2 * math.pi
@@ -25,7 +26,7 @@ class Ray:
         while self.angle < 0:
             self.angle += 2 * math.pi
 
-    def cast(self, window, map):
+    def cast(self, window, map, heading):
         self.shortest_distance = math.inf
 
         # Rounded variables used for comparisons
@@ -123,4 +124,37 @@ class Ray:
                 shortest_ray_y = ray_y
                 self.horizontal_wall = False
 
-        pygame.draw.line(window, BLUE, (self.pos.x, self.pos.y), (shortest_ray_x, shortest_ray_y))
+        self.length = distance(self.pos.x, self.pos.y, shortest_ray_x, shortest_ray_y)
+
+        self.endpoint = Vector2D(shortest_ray_x, shortest_ray_y)
+        if self.angle == heading:
+            colour = RED
+        else:
+            colour = BLUE
+        pygame.draw.line(window, colour, (self.pos.x, self.pos.y), (shortest_ray_x, shortest_ray_y))
+
+    
+
+    def get_points_in_line(self, points, radius):
+        # Narrow Search
+        near = []
+        for point in points:
+            if self.angle == 0 or self.angle == math.pi:
+                if abs(point.pos.y - self.pos.y) <= radius:
+                    near.append(point)
+            elif self.angle == math.pi / 2 or self.angle == 3/2 * math.pi:
+                if abs(point.pos.x - self.pos.x) <= radius:
+                    near.append(point)
+            else:
+                slope = (self.pos.y - self.endpoint.y) / (self.pos.x - self.endpoint.x)
+                inverse_slope = -1 / slope
+
+                x_poi = ((point.pos.y - point.pos.x * inverse_slope) - (self.pos.y - self.pos.x * slope)) / (slope - inverse_slope)
+                y_poi = (x_poi - self.pos.x) * slope + self.pos.y
+                dist = distance(point.pos.x, point.pos.y, x_poi, y_poi)
+
+                if dist <= radius:
+                    near.append(point)
+                    point.distance_from_player = dist
+
+        return near
