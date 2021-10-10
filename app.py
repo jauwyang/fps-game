@@ -5,6 +5,7 @@ from enemy import Enemy
 import pygame
 import math
 from math_tools import Vector2D
+from pathfinder import A_star
 
 # ==== GLOBAL VARIABLES ====
 CLOCK = pygame.time.Clock()
@@ -107,10 +108,13 @@ def keyboard_input(window, map, player, enemies, animation_frames):
     map.wall_collision(player, x_change, y_change)
 
     # Player rotation
+    look_multiplier = 1
+    if keys[pygame.K_UP]:
+        look_multiplier *= 5 
     if keys[pygame.K_LEFT]:
-        player.rotate(-0.01)
+        player.rotate(-0.01 * look_multiplier)
     if keys[pygame.K_RIGHT]:
-        player.rotate(0.01)
+        player.rotate(0.01 * look_multiplier)
 
     # Player shoot
     if keys[pygame.K_SPACE]:
@@ -120,6 +124,12 @@ def keyboard_input(window, map, player, enemies, animation_frames):
         animation_frames["gun_blast"] -= 1
 
 
+def update_entities(pathfinder_map, user, enemies):
+    # Update position of enemies
+    for enemy in enemies:
+        enemy.pathfind(pathfinder_map, user)
+
+
 def init():
     pygame.init()
     window = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
@@ -127,6 +137,7 @@ def init():
 
     user = Player(100, 100, GREEN)  # Create player
     game_map = Map(map)  # Create Map
+    pathfinder_map = A_star(game_map)  # Create grid used for pathfinding algorithm
     enemies = generate_enemies()
     
     animation_frames = {
@@ -141,6 +152,7 @@ def init():
                 run = False
         draw_window(window, game_map, user, enemies)
         keyboard_input(window, game_map, user, enemies, animation_frames)
+        update_entities(pathfinder_map, user, enemies)
         pygame.display.update()
         
 

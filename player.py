@@ -1,4 +1,4 @@
-from config import SCENE_HEIGHT, SCENE_WIDTH, MAP_WIDTH, FOV
+from config import SCENE_HEIGHT, SCENE_WIDTH, MAP_WIDTH, PLAYABLE_TO_MAP_SCREEN_SCALE ,FOV
 from math_tools import Vector2D, distance
 from raycast import Ray
 import math
@@ -31,8 +31,8 @@ class Player:
         self.pos.y += delta_y
 
     def draw(self, window, map):
-        pygame.draw.circle(window, self.colour, (self.pos.x, self.pos.y), 5)
-        pygame.draw.line(window, self.colour, (self.pos.x, self.pos.y), (self.pos.x + 30 * math.cos(self.heading), self.pos.y + 30 * math.sin(self.heading)))
+        pygame.draw.circle(window, self.colour, (self.pos.x * PLAYABLE_TO_MAP_SCREEN_SCALE, self.pos.y * PLAYABLE_TO_MAP_SCREEN_SCALE), 5)
+        pygame.draw.line(window, self.colour, (self.pos.x * PLAYABLE_TO_MAP_SCREEN_SCALE, self.pos.y * PLAYABLE_TO_MAP_SCREEN_SCALE), (self.pos.x * PLAYABLE_TO_MAP_SCREEN_SCALE + 30 * math.cos(self.heading), self.pos.y * PLAYABLE_TO_MAP_SCREEN_SCALE + 30 * math.sin(self.heading)))
         index = 0
         for ray in self.rays:
             ray.cast(window, map, self.heading)

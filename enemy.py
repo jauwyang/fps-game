@@ -1,12 +1,14 @@
 from math_tools import Vector2D, distance
 import pygame
-from config import SCENE_HEIGHT, SCENE_WIDTH, MAP_WIDTH, FOV, RED, LIMITED_VISION
+from config import SCENE_HEIGHT, SCENE_WIDTH, MAP_WIDTH, PLAYABLE_TO_MAP_SCREEN_SCALE, FOV, RED, LIMITED_VISION
 import math
 
 class Enemy:
     def __init__(self, x ,y):
         self.pos = Vector2D(x, y)
         self.distance_from_player = 0
+        self.movement_delay = 15
+        self.movement_counter = 0
 
     def get_distance_from_player(self, player):
         dist = distance(self.pos.x, self.pos.y, player.pos.x, player.pos.y)
@@ -56,6 +58,13 @@ class Enemy:
     def draw_on_map(self, window, player):
         if LIMITED_VISION:
             if self.is_player_in_view(player):
-                pygame.draw.circle(window, RED, (self.pos.x, self.pos.y), 5)
+                pygame.draw.circle(window, RED, (self.pos.x * PLAYABLE_TO_MAP_SCREEN_SCALE, self.pos.y * PLAYABLE_TO_MAP_SCREEN_SCALE), 5)
         else:
-            pygame.draw.circle(window, RED, (self.pos.x, self.pos.y), 5)
+            pygame.draw.circle(window, RED, (self.pos.x * PLAYABLE_TO_MAP_SCREEN_SCALE, self.pos.y * PLAYABLE_TO_MAP_SCREEN_SCALE), 5)
+
+    def pathfind(self, pathfinder_map, player):
+        self.movement_counter += 1
+        if math.floor(self.get_distance_from_player(player)) >= 10 and self.movement_counter == self.movement_delay:
+            path = pathfinder_map.search(self.pos, player.pos)
+            self.pos = Vector2D(path[1].x, path[1].y)
+            self.movement_counter = 0
