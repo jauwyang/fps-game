@@ -64,7 +64,7 @@ class Enemy:
 
     def pathfind(self, pathfinder_map, player):
         self.movement_counter += 1
-        if math.floor(self.get_distance_from_player(player)) >= 10 and self.movement_counter == self.movement_delay:
+        if math.floor(self.get_distance_from_player(player)) >= 15 and self.movement_counter == self.movement_delay:
             path = pathfinder_map.search(self.pos, player.pos)
             self.pos = Vector2D(path[1].x, path[1].y)
             self.movement_counter = 0

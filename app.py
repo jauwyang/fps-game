@@ -109,12 +109,12 @@ def keyboard_input(window, map, player, enemies, animation_frames):
 
     # Player rotation
     look_multiplier = 1
-    if keys[pygame.K_UP]:
-        look_multiplier *= 5 
+    if keys[pygame.K_DOWN]:
+        look_multiplier *= 1/5
     if keys[pygame.K_LEFT]:
-        player.rotate(-0.01 * look_multiplier)
+        player.rotate(-0.05 * look_multiplier)
     if keys[pygame.K_RIGHT]:
-        player.rotate(0.01 * look_multiplier)
+        player.rotate(0.05 * look_multiplier)
 
     # Player shoot
     if keys[pygame.K_SPACE]:

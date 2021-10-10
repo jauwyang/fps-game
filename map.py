@@ -32,9 +32,10 @@ class Map:
         new_y_pos = player.pos.y + delta_y
         new_x_pos_index = math.floor(new_x_pos / self.block_width)
         new_y_pos_index = math.floor(new_y_pos / self.block_height)
+        x_pos_index = math.floor(player.pos.x / self.block_width)
+        y_pos_index = math.floor(player.pos.y / self.block_height)
 
-        if self.map[new_y_pos_index][new_x_pos_index] == 0:
-            if new_x_pos < PLAYABLE_MAP_SIZE and new_x_pos > 0:
-                player.pos.x = new_x_pos
-            if new_y_pos < PLAYABLE_MAP_SIZE and new_y_pos > 0:
-                player.pos.y = new_y_pos
+        if (new_x_pos < PLAYABLE_MAP_SIZE and new_x_pos > 0) and self.map[y_pos_index][new_x_pos_index] == 0:
+            player.pos.x = new_x_pos
+        if (new_y_pos < PLAYABLE_MAP_SIZE and new_y_pos > 0) and self.map[new_y_pos_index][x_pos_index] == 0:
+            player.pos.y = new_y_pos

@@ -84,4 +84,9 @@ class Player:
         line_of_sight = self.rays[self.main_ray_index]
         points_in_fov = self.get_points_in_fov(enemies)
         points_on_line = line_of_sight.get_points_in_line(points_in_fov, 10)
-        print(len(points_on_line))
+        if len(points_on_line) > 0:
+            for enemy in points_on_line:
+                enemies.remove(enemy)
+                print("Killed")
+            # print(len(points_on_line))
+            # print(type(points_on_line[0]))
