@@ -46,7 +46,6 @@ def generate_enemies():
     enemies = []
     for enemy in range(ENEMY_NUM):
         enemies.append(Enemy(500, 300))
-
     return enemies
 
 

@@ -1,17 +1,28 @@
-from config import PLAYABLE_MAP_SIZE, PLAYABLE_TO_MAP_SCREEN_SCALE
+from config import PLAYABLE_MAP_SIZE
 from math_tools import Vector2D, distance
 import math
 from tools import printProgressBar
 
-PLAYABLE_TO_A_STAR_SCALE = 15
-A_STAR_TO_SIMPLIFIED_SCALE = 6
-A_STAR_SIZE = PLAYABLE_MAP_SIZE / PLAYABLE_TO_A_STAR_SCALE
-PLAYABLE_TO_SIMPLIFIED_SCALE = PLAYABLE_TO_A_STAR_SCALE * A_STAR_TO_SIMPLIFIED_SCALE
+# MAP SCALES
+'''
+These scales are used to convert the coordinates of one map to another.
+There are three maps:
+- Custom Map
+- Playable Map
+- A Star Map
+Multiplying the scales convert the coordinates according to the name.
+Dividing the scales convert the coordinates opposite to their names.
+'''
+PLAYABLE_TO_A_STAR_SCALE = 1/15
+A_STAR_TO_SIMPLIFIED_SCALE = 1/6
+A_STAR_SIZE = PLAYABLE_MAP_SIZE * PLAYABLE_TO_A_STAR_SCALE
+# PLAYABLE_TO_SIMPLIFIED_SCALE = (1 / PLAYABLE_TO_A_STAR_SCALE) * (1 / A_STAR_TO_SIMPLIFIED_SCALE)
+
 
 class A_star:
     def __init__(self, simplified_map):
         self.a_star_grid = []
-        
+
         # Generate map
         printProgressBar(0, int(A_STAR_SIZE * 2), prefix = 'Rendering Map:', suffix = 'Complete', length = 50)
         percent_complete = 1
@@ -22,7 +33,6 @@ class A_star:
             percent_complete += 1
             printProgressBar(percent_complete, int(A_STAR_SIZE * 2), prefix = 'Rendering Map:', suffix = 'Complete', length = 50)
             self.a_star_grid.append(a_star_x)
-        
         for y in range(len(self.a_star_grid)):
             for x in range(len(a_star_x)):
                 self.a_star_grid[y][x].add_neighours(self.a_star_grid)
@@ -30,13 +40,12 @@ class A_star:
             percent_complete += 1
         print("Finished rendering map")
 
-
     def search(self, start, end):
         closed_set = []
         open_set = []
         path = []
-        start_pos = self.a_star_grid[math.floor(start.y / PLAYABLE_TO_A_STAR_SCALE)][math.floor(start.x / PLAYABLE_TO_A_STAR_SCALE)]
-        end_pos = self.a_star_grid[math.floor(end.y / PLAYABLE_TO_A_STAR_SCALE)][math.floor(end.x / PLAYABLE_TO_A_STAR_SCALE)]
+        start_pos = self.a_star_grid[math.floor(start.y * PLAYABLE_TO_A_STAR_SCALE)][math.floor(start.x * PLAYABLE_TO_A_STAR_SCALE)]
+        end_pos = self.a_star_grid[math.floor(end.y * PLAYABLE_TO_A_STAR_SCALE)][math.floor(end.x * PLAYABLE_TO_A_STAR_SCALE)]
 
 
         open_set.append(start_pos)
@@ -49,18 +58,16 @@ class A_star:
                     lowest_cost_spot = spot
             current_spot = lowest_cost_spot
 
-
             # If the lowest cost index is the end, return final path
             if current_spot == end_pos:
                 temp = current_spot
-                path.append(Vector2D(temp.pos.x * PLAYABLE_TO_A_STAR_SCALE, temp.pos.y * PLAYABLE_TO_A_STAR_SCALE))
+                path.append(Vector2D(temp.pos.x / PLAYABLE_TO_A_STAR_SCALE, temp.pos.y / PLAYABLE_TO_A_STAR_SCALE))
                 temp.reset_values()
-
                 for node in closed_set:
                     node.reset_values()
                 while (temp.previous is not None):
                     temp.previous.reset_values()
-                    path.append(Vector2D(temp.previous.pos.x * PLAYABLE_TO_A_STAR_SCALE, temp.previous.pos.y * PLAYABLE_TO_A_STAR_SCALE))
+                    path.append(Vector2D(temp.previous.pos.x / PLAYABLE_TO_A_STAR_SCALE, temp.previous.pos.y / PLAYABLE_TO_A_STAR_SCALE))
                     child = temp
                     temp = temp.previous
                     child.previous = None
@@ -106,7 +113,7 @@ class Spot:
         self.h_value = 0
         self.neighbours = []
         self.previous = None
-        if simplified_map.map[math.floor(y / A_STAR_TO_SIMPLIFIED_SCALE)][math.floor(x / A_STAR_TO_SIMPLIFIED_SCALE)] == 1:
+        if simplified_map.customized_map[math.floor(y * A_STAR_TO_SIMPLIFIED_SCALE)][math.floor(x * A_STAR_TO_SIMPLIFIED_SCALE)] == 1:
             self.wall = True
         else:
             self.wall = False

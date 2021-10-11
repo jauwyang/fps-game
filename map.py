@@ -2,11 +2,10 @@ from config import MAP_WIDTH, MAP_HEIGHT, PLAYABLE_MAP_SIZE, PLAYABLE_TO_MAP_SCR
 import pygame
 import math
 
-PLAYABLE_TO_MAP_SCREEN_SCALE = 5/6
 
 class Map:
     def __init__(self, map):
-        self.map = map
+        self.customized_map = map
         self.m_width = len(map[0])
         self.m_height = len(map)
         self.block_width = PLAYABLE_MAP_SIZE / self.m_width
@@ -14,9 +13,8 @@ class Map:
 
     def draw_map(self, window):
         row_pos = 0
-        column_pos = 0
-
-        for row in self.map:
+        for row in self.customized_map:
+            column_pos = 0
             for column in row:
                 if column == 0:
                     colour = BLACK
@@ -24,7 +22,6 @@ class Map:
                     colour = WHITE
                 pygame.draw.rect(window, colour, (column_pos * self.block_width * PLAYABLE_TO_MAP_SCREEN_SCALE, row_pos * self.block_height * PLAYABLE_TO_MAP_SCREEN_SCALE, self.block_width * PLAYABLE_TO_MAP_SCREEN_SCALE - 1, self.block_height * PLAYABLE_TO_MAP_SCREEN_SCALE - 1))
                 column_pos += 1
-            column_pos = 0
             row_pos += 1
 
     def wall_collision(self, player, delta_x, delta_y):
@@ -35,7 +32,7 @@ class Map:
         x_pos_index = math.floor(player.pos.x / self.block_width)
         y_pos_index = math.floor(player.pos.y / self.block_height)
 
-        if (new_x_pos < PLAYABLE_MAP_SIZE and new_x_pos > 0) and self.map[y_pos_index][new_x_pos_index] == 0:
+        if (new_x_pos < PLAYABLE_MAP_SIZE and new_x_pos > 0) and self.customized_map[y_pos_index][new_x_pos_index] == 0:
             player.pos.x = new_x_pos
-        if (new_y_pos < PLAYABLE_MAP_SIZE and new_y_pos > 0) and self.map[new_y_pos_index][x_pos_index] == 0:
+        if (new_y_pos < PLAYABLE_MAP_SIZE and new_y_pos > 0) and self.customized_map[new_y_pos_index][x_pos_index] == 0:
             player.pos.y = new_y_pos

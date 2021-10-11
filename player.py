@@ -1,4 +1,4 @@
-from config import SCENE_HEIGHT, SCENE_WIDTH, MAP_WIDTH, PLAYABLE_TO_MAP_SCREEN_SCALE ,FOV
+from config import SCENE_HEIGHT, SCENE_WIDTH, MAP_WIDTH, PLAYABLE_TO_MAP_SCREEN_SCALE, FOV
 from math_tools import Vector2D, distance
 from raycast import Ray
 import math

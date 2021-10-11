@@ -65,7 +65,7 @@ class Ray:
             map_pos_y = math.ceil(ray_y / map.block_width) + horizontal_line_direction_offset
             if map_pos_x >= map.m_width or map_pos_y >= map.m_height or map_pos_x < 0 or map_pos_y < 0:
                 horizontal_line_check = False
-            elif map_pos_x < map.m_width and map.map[map_pos_y][map_pos_x] == 1:
+            elif map_pos_x < map.m_width and map.customized_map[map_pos_y][map_pos_x] == 1:
                 horizontal_line_check = False
             else:
                 ray_x += offset_x
@@ -110,7 +110,7 @@ class Ray:
             map_pos_y = math.ceil(ray_y / map.block_width) - 1
             if map_pos_x >= map.m_width or map_pos_y >= map.m_height or map_pos_x < 0 or map_pos_y < 0:
                 vertical_line_check = False
-            elif map_pos_x < map.m_width and map.map[map_pos_y][map_pos_x] == 1:
+            elif map_pos_x < map.m_width and map.customized_map[map_pos_y][map_pos_x] == 1:
                 vertical_line_check = False
             else:
                 ray_x += offset_x
