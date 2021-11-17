@@ -1,4 +1,4 @@
-from config import SCENE_HEIGHT, SCENE_WIDTH, MAP_WIDTH, PLAYABLE_TO_MAP_SCREEN_SCALE, FOV
+from config import SCENE_HEIGHT, SCENE_WIDTH, MAP_WIDTH, PLAYABLE_TO_MAP_SCREEN_SCALE, FOV, ENEMY_HITBOX_WIDTH
 from math_tools import Vector2D, distance
 from raycast import Ray
 import math
@@ -44,6 +44,8 @@ class Player:
         points_seen = []
         for point in points:
             delta_angle = point.get_angle_from_player(self)
+            if delta_angle >= math.pi:
+                delta_angle = 2 * math.pi - delta_angle
             if math.degrees(abs(delta_angle)) < FOV / 2:
                 points_seen.append(point)
         return points_seen
@@ -83,7 +85,7 @@ class Player:
         # Test collision
         line_of_sight = self.rays[self.main_ray_index]
         points_in_fov = self.get_points_in_fov(enemies)
-        points_on_line = line_of_sight.get_points_in_line(points_in_fov, 10)
+        points_on_line = line_of_sight.get_points_in_line(points_in_fov, ENEMY_HITBOX_WIDTH)
         if len(points_on_line) > 0:
             for enemy in points_on_line:
                 enemies.remove(enemy)

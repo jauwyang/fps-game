@@ -21,6 +21,8 @@ GREEN = (0, 255, 0)
 BLUE = (0, 0, 255)
 GREY = (45, 45, 48)
 
+# Other
+ENEMY_HITBOX_WIDTH = 12
 
 # ===== CUSTOMIZALE SETTINGS =====
 #  Crosshair Settings
@@ -31,4 +33,4 @@ CROSSHAIR_COLOUR = GREEN
 #  Game Settings
 FOV = 60
 ENEMY_NUM = 1
-LIMITED_VISION = True
+LIMITED_VISION = False

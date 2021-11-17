@@ -28,7 +28,7 @@ FPS = 60
 # ]
 
 map = [
-    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+    [1, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 1],
     [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
     [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
     [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
@@ -123,10 +123,10 @@ def keyboard_input(window, map, player, enemies, animation_frames):
         animation_frames["gun_blast"] -= 1
 
 
-def update_entities(pathfinder_map, user, enemies):
+def update_entities(pathfinder_map, user, enemies, window):
     # Update position of enemies
     for enemy in enemies:
-        enemy.pathfind(pathfinder_map, user)
+        enemy.pathfind(pathfinder_map, user, window)
 
 
 def init():
@@ -151,7 +151,7 @@ def init():
                 run = False
         draw_window(window, game_map, user, enemies)
         keyboard_input(window, game_map, user, enemies, animation_frames)
-        update_entities(pathfinder_map, user, enemies)
+        update_entities(pathfinder_map, user, enemies, window)
         pygame.display.update()
         
 

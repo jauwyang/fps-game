@@ -138,11 +138,16 @@ class Ray:
     def get_points_in_line(self, points, radius):
         # Narrow Search
         near = []
+        ray_delta_y = self.pos.y - self.endpoint.y
+        ray_delta_x = self.pos.x - self.endpoint.x
         for point in points:
-            if self.angle == 0 or self.angle == math.pi:
+
+            # If aligned on x-axis
+            if ray_delta_y == 0:
                 if abs(point.pos.y - self.pos.y) <= radius:
                     near.append(point)
-            elif self.angle == math.pi / 2 or self.angle == 3/2 * math.pi:
+            # If aligned on y-axis
+            elif ray_delta_x == 0:
                 if abs(point.pos.x - self.pos.x) <= radius:
                     near.append(point)
             else:

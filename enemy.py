@@ -3,12 +3,24 @@ import pygame
 from config import SCENE_HEIGHT, SCENE_WIDTH, MAP_WIDTH, PLAYABLE_TO_MAP_SCREEN_SCALE, FOV, RED, LIMITED_VISION
 import math
 
+WALK_DELAY = 30
+
 class Enemy:
     def __init__(self, x ,y):
         self.pos = Vector2D(x, y)
         self.distance_from_player = 0
+
         self.movement_delay = 15
-        self.movement_counter = 0
+        self.movement_counter = 15
+        self.movement_direction = 0
+        self.speed = 0.8
+
+        self.key_frame = None
+        self.key_frame_type = 1
+        self.walk_timer = 0
+
+
+        self.path = None
 
     def get_distance_from_player(self, player):
         dist = distance(self.pos.x, self.pos.y, player.pos.x, player.pos.y)
@@ -51,20 +63,51 @@ class Enemy:
             ray_slice_width = SCENE_WIDTH * 5 / self.distance_from_player
             if ray_slice_height > SCENE_HEIGHT:
                 ray_slice_height = SCENE_HEIGHT
-            pygame.draw.rect(window, RED, (MAP_WIDTH + angle_slice * screen_ray, (SCENE_HEIGHT - ray_slice_height) / 2, ray_slice_width, ray_slice_height))
+            
+            # Determine key frame
+            if self.walk_timer <= 0:
+                self.walk_timer = WALK_DELAY
+                if self.key_frame_type == 1:
+                    self.key_frame = pygame.image.load('images/walk_1.png')
+                else:
+                    self.key_frame = pygame.image.load('images/walk_2.png')
+                self.key_frame_type *= -1
+            frame_width = self.key_frame.get_size()[0]
+            frame_length = self.key_frame.get_size()[1]
+            self.key_frame = pygame.transform.scale(self.key_frame, (int(ray_slice_width)*5, int(ray_slice_height*2)))
+            window.blit(self.key_frame, (MAP_WIDTH + angle_slice * screen_ray - frame_width / 2, (SCENE_HEIGHT - ray_slice_height * 1.5) / 2))
+            self.walk_timer -= 1
+
+
+            # pygame.draw.rect(window, RED, (MAP_WIDTH + angle_slice * screen_ray, (SCENE_HEIGHT - ray_slice_height) / 2, ray_slice_width, ray_slice_height))
             # enemy = pygame
             # window.blit()
 
     def draw_on_map(self, window, player):
         if LIMITED_VISION:
             if self.is_player_in_view(player):
-                pygame.draw.circle(window, RED, (self.pos.x * PLAYABLE_TO_MAP_SCREEN_SCALE, self.pos.y * PLAYABLE_TO_MAP_SCREEN_SCALE), 5)
+                pygame.draw.circle(window, RED, (self.pos.x * PLAYABLE_TO_MAP_SCREEN_SCALE, self.pos.y * PLAYABLE_TO_MAP_SCREEN_SCALE), 10)
         else:
-            pygame.draw.circle(window, RED, (self.pos.x * PLAYABLE_TO_MAP_SCREEN_SCALE, self.pos.y * PLAYABLE_TO_MAP_SCREEN_SCALE), 5)
+            pygame.draw.circle(window, RED, (self.pos.x * PLAYABLE_TO_MAP_SCREEN_SCALE, self.pos.y * PLAYABLE_TO_MAP_SCREEN_SCALE), 10)
 
-    def pathfind(self, pathfinder_map, player):
-        self.movement_counter += 1
+    def pathfind(self, pathfinder_map, player, window):
         if math.floor(self.get_distance_from_player(player)) >= 15 and self.movement_counter == self.movement_delay:
-            path = pathfinder_map.search(self.pos, player.pos)
-            self.pos = Vector2D(path[1].x, path[1].y)
+            self.path = pathfinder_map.search(self.pos, player.pos)
+
+            self.movement_direction = math.atan2(self.path[3].y - self.pos.y, self.path[3].x - self.pos.x)
+            
+            if self.movement_direction < 0:
+                self.movement_direction += 2*math.pi
+            # print(math.degrees(self.movement_direction))
+            
+            # self.pos = Vector2D(self.path[1].x, self.path[1].y)
             self.movement_counter = 0
+        
+        self.movement_counter += 1
+        self.pos.x += self.speed * math.cos(self.movement_direction)
+        self.pos.y += self.speed * math.sin(self.movement_direction)
+        # print(math.cos(self.movement_direction))
+        # print(math.sin(self.movement_direction))
+        
+        for step in self.path:
+                pygame.draw.circle(window, RED, (step.x * PLAYABLE_TO_MAP_SCREEN_SCALE, step.y * PLAYABLE_TO_MAP_SCREEN_SCALE), 1)
