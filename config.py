@@ -23,6 +23,7 @@ GREY = (45, 45, 48)
 
 # Other
 ENEMY_HITBOX_WIDTH = 12
+PISTOL_COOLDOWN = 10
 
 # ===== CUSTOMIZALE SETTINGS =====
 #  Crosshair Settings

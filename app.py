@@ -54,7 +54,7 @@ def draw_sky(window):
     # pygame.draw.rect(window, (0, 255, 0), (MAP_WIDTH, SCENE_HEIGHT / 2, SCENE_WIDTH, SCENE_HEIGHT / 2))
 
 
-def draw_ui(window):
+def draw_ui(window, user):
     # Draw crosshair
     pygame.draw.rect(window, CROSSHAIR_COLOUR, (MAP_WIDTH + SCENE_WIDTH / 2 - CROSSHAIR_WIDTH / 2, SCENE_HEIGHT / 2 - CROSSHAIR_LENGTH / 2, CROSSHAIR_WIDTH, CROSSHAIR_LENGTH))
     pygame.draw.rect(window, CROSSHAIR_COLOUR, (MAP_WIDTH + SCENE_WIDTH / 2 - CROSSHAIR_LENGTH / 2, SCENE_HEIGHT / 2 - CROSSHAIR_WIDTH / 2, CROSSHAIR_LENGTH, CROSSHAIR_WIDTH))
@@ -62,6 +62,18 @@ def draw_ui(window):
     # Draw pistol
     pistol = pygame.image.load('images/pistol.png')
     window.blit(pistol, (MAP_WIDTH + SCENE_WIDTH - 300, SCENE_HEIGHT - 320))
+
+    # Draw Ammo
+    if user.ammunition == 3:
+        ammo = pygame.image.load('images/ammo_3.png')
+    elif user.ammunition == 2:
+        ammo = pygame.image.load('images/ammo_2.png')
+    elif user.ammunition == 1:
+        ammo = pygame.image.load('images/ammo_1.png')
+    else:
+        ammo = pygame.image.load('images/ammo_0.png')
+    ammo = pygame.transform.scale(ammo, (100, 50))
+    window.blit(ammo, (MAP_WIDTH + SCENE_WIDTH - 150, SCENE_HEIGHT - 120))
 
 
 def draw_window(window, game_map, user, enemies):
@@ -74,7 +86,7 @@ def draw_window(window, game_map, user, enemies):
     for enemy in enemies:
         enemy.draw_on_map(window, user)
         enemy.draw_on_scene(window, user)
-    draw_ui(window)
+    draw_ui(window, user)
     
     # pygame.display.update()
 
@@ -115,12 +127,15 @@ def keyboard_input(window, map, player, enemies, animation_frames):
     if keys[pygame.K_RIGHT]:
         player.rotate(0.05 * look_multiplier)
 
-    # Player shoot
-    if keys[pygame.K_SPACE]:
-        animation_frames["gun_blast"] = 1
+    # Player shoot  
+    for event in pygame.event.get():
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_SPACE:
+                animation_frames["gun_blast"] = 1
+                player.shoot(window, enemies)
     if animation_frames["gun_blast"] > 0:
-        player.shoot(window, enemies)
         animation_frames["gun_blast"] -= 1
+
 
 
 def update_entities(pathfinder_map, user, enemies, window):
