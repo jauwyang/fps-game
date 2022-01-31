@@ -11,7 +11,7 @@ class Player:
         self.rays = []
         self.heading = 0
         self.colour = colour
-        self.shoot_cooldown = PISTOL_COOLDOWN
+        self.can_shoot = True
         self.ammunition = 3
         self.main_ray_distance = 0
         for angle in range(round(-FOV / 2), round(FOV / 2)):
@@ -79,12 +79,18 @@ class Player:
             pygame.draw.rect(window, colour, (MAP_WIDTH + ray_x_pos * ray_slice_width, (SCENE_HEIGHT - ray_slice_height) / 2, ray_slice_width, ray_slice_height))
             ray_x_pos += 1
 
-    def shoot(self, window, enemies):
+    def shoot(self, window, enemies, keypress):
         # Animate shot
-        if self.ammunition == 0:
+        if self.ammunition == 0 or (keypress == 'down' and not self.can_shoot):
             return
-        if self.shoot_cooldown != PISTOL_COOLDOWN:
-            
+        
+        if keypress == 'up':
+            print("up")
+            self.can_shoot = True
+            return
+
+        print("down")
+        self.can_shoot = False
         self.ammunition -= 1
         blast = pygame.image.load('images/blast.png')
         window.blit(blast, (MAP_WIDTH + SCENE_WIDTH - 700, SCENE_HEIGHT - 600))
@@ -99,3 +105,10 @@ class Player:
                 print("Killed")
             # print(len(points_on_line))
             # print(type(points_on_line[0]))
+
+    def reload(self, window):
+        if self.ammunition == 3:
+            return
+        
+        self.ammunition = 3
+        self.can_shoot = True

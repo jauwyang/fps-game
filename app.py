@@ -128,11 +128,16 @@ def keyboard_input(window, map, player, enemies, animation_frames):
         player.rotate(0.05 * look_multiplier)
 
     # Player shoot  
+    # print(pygame.event.get())
     for event in pygame.event.get():
-        if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_SPACE:
-                animation_frames["gun_blast"] = 1
-                player.shoot(window, enemies)
+        if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
+            player.shoot(window, enemies, 'down')
+            animation_frames["gun_blast"] = 1
+        if event.type == pygame.KEYUP and event.key == pygame.K_SPACE:
+            player.shoot(window, enemies, 'up')
+        if event.type == pygame.KEYDOWN and event.key == pygame.K_r:
+            player.reload(window)
+
     if animation_frames["gun_blast"] > 0:
         animation_frames["gun_blast"] -= 1
 
