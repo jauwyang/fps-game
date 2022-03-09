@@ -1,4 +1,5 @@
-from config import SCENE_HEIGHT, SCENE_WIDTH, WINDOW_WIDTH, WINDOW_HEIGHT, MAP_WIDTH, MAP_HEIGHT, GREEN, GREY, CROSSHAIR_LENGTH, CROSSHAIR_WIDTH, CROSSHAIR_COLOUR, ENEMY_NUM
+from imp import reload
+from config import SCENE_HEIGHT, SCENE_WIDTH, WINDOW_WIDTH, WINDOW_HEIGHT, MAP_WIDTH, MAP_HEIGHT, GREEN, GREY, CROSSHAIR_LENGTH, CROSSHAIR_WIDTH, CROSSHAIR_COLOUR, ENEMY_NUM, RED
 from player import Player
 from map import Map
 from enemy import Enemy
@@ -54,7 +55,7 @@ def draw_sky(window):
     # pygame.draw.rect(window, (0, 255, 0), (MAP_WIDTH, SCENE_HEIGHT / 2, SCENE_WIDTH, SCENE_HEIGHT / 2))
 
 
-def draw_ui(window, user):
+def draw_ui(window, user, font):
     # Draw crosshair
     pygame.draw.rect(window, CROSSHAIR_COLOUR, (MAP_WIDTH + SCENE_WIDTH / 2 - CROSSHAIR_WIDTH / 2, SCENE_HEIGHT / 2 - CROSSHAIR_LENGTH / 2, CROSSHAIR_WIDTH, CROSSHAIR_LENGTH))
     pygame.draw.rect(window, CROSSHAIR_COLOUR, (MAP_WIDTH + SCENE_WIDTH / 2 - CROSSHAIR_LENGTH / 2, SCENE_HEIGHT / 2 - CROSSHAIR_WIDTH / 2, CROSSHAIR_LENGTH, CROSSHAIR_WIDTH))
@@ -72,11 +73,13 @@ def draw_ui(window, user):
         ammo = pygame.image.load('images/ammo_1.png')
     else:
         ammo = pygame.image.load('images/ammo_0.png')
+        # no_ammo = font.render("NO AMMO", 1, RED)
+        # window.blit(no_ammo, (MAP_WIDTH + SCENE_WIDTH / 2, SCENE_HEIGHT / 2))
     ammo = pygame.transform.scale(ammo, (100, 50))
     window.blit(ammo, (MAP_WIDTH + SCENE_WIDTH - 150, SCENE_HEIGHT - 120))
 
 
-def draw_window(window, game_map, user, enemies):
+def draw_window(window, game_map, user, enemies, font):
     window.fill(GREY)
     draw_sky(window)
     game_map.draw_map(window)
@@ -86,7 +89,7 @@ def draw_window(window, game_map, user, enemies):
     for enemy in enemies:
         enemy.draw_on_map(window, user)
         enemy.draw_on_scene(window, user)
-    draw_ui(window, user)
+    draw_ui(window, user, font)
     
     # pygame.display.update()
 
@@ -130,17 +133,20 @@ def keyboard_input(window, map, player, enemies, animation_frames):
     # Player shoot  
     # print(pygame.event.get())
     for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            return False
         if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
             player.shoot(window, enemies, 'down')
             animation_frames["gun_blast"] = 1
-        if event.type == pygame.KEYUP and event.key == pygame.K_SPACE:
+        elif event.type == pygame.KEYUP and event.key == pygame.K_SPACE:
             player.shoot(window, enemies, 'up')
         if event.type == pygame.KEYDOWN and event.key == pygame.K_r:
             player.reload(window)
 
     if animation_frames["gun_blast"] > 0:
         animation_frames["gun_blast"] -= 1
-
+    
+    return True
 
 
 def update_entities(pathfinder_map, user, enemies, window):
@@ -158,7 +164,7 @@ def init():
     game_map = Map(map)  # Create Map
     pathfinder_map = A_star(game_map)  # Create grid used for pathfinding algorithm
     enemies = generate_enemies()
-    
+    font = pygame.font.SysFont("dejavusans", 24)
     animation_frames = {
     "gun_blast": 0
     }
@@ -166,11 +172,11 @@ def init():
     run = True
     while run:
         CLOCK.tick(FPS)
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                run = False
-        draw_window(window, game_map, user, enemies)
-        keyboard_input(window, game_map, user, enemies, animation_frames)
+        # for event in pygame.event.get():
+        #     if event.type == pygame.QUIT:
+        #         run = False
+        draw_window(window, game_map, user, enemies, font)
+        run = keyboard_input(window, game_map, user, enemies, animation_frames)
         update_entities(pathfinder_map, user, enemies, window)
         pygame.display.update()
         

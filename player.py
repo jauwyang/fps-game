@@ -83,13 +83,13 @@ class Player:
         # Animate shot
         if self.ammunition == 0 or (keypress == 'down' and not self.can_shoot):
             return
-        
+            
+        # Prevent player from being able to hold down fire button
         if keypress == 'up':
-            print("up")
             self.can_shoot = True
             return
 
-        print("down")
+
         self.can_shoot = False
         self.ammunition -= 1
         blast = pygame.image.load('images/blast.png')
