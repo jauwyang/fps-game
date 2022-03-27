@@ -5,7 +5,8 @@ from map import Map
 from enemy import Enemy
 import pygame
 import math
-from math_tools import Vector2D
+from tools.math_tools import Vector2D
+from tools.merge_sort_layer_priority import merge_sort_layer_priority
 from pathfinder import A_star
 
 # ==== GLOBAL VARIABLES ====
@@ -40,7 +41,7 @@ map = [
     [1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1],
     [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
     [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+    [1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 0, 0]
 ]
 
 def generate_enemies():
@@ -61,6 +62,8 @@ def draw_ui(window, user, font):
     pygame.draw.rect(window, CROSSHAIR_COLOUR, (MAP_WIDTH + SCENE_WIDTH / 2 - CROSSHAIR_LENGTH / 2, SCENE_HEIGHT / 2 - CROSSHAIR_WIDTH / 2, CROSSHAIR_LENGTH, CROSSHAIR_WIDTH))
 
     # Draw pistol
+    test = (window, RED, (0, 0), 20)
+    pygame.draw.circle(*test)
     pistol = pygame.image.load('images/pistol.png')
     window.blit(pistol, (MAP_WIDTH + SCENE_WIDTH - 300, SCENE_HEIGHT - 320))
 
@@ -80,17 +83,37 @@ def draw_ui(window, user, font):
 
 
 def draw_window(window, game_map, user, enemies, font):
+
+    """
+    COMMIT CHANGES BEFORE ACTUALLY IMPLEMENTING NEW IMAGE RENDERING METHOD <<<<<<<
+    """
     window.fill(GREY)
+
+    image_layers = []
+
     draw_sky(window)
-    game_map.draw_map(window)
+    
     user.draw(window, game_map)
 
     user.draw_scene_walls(window, game_map)
+    game_map.draw_map(window)
     for enemy in enemies:
         enemy.draw_on_map(window, user)
         enemy.draw_on_scene(window, user)
     draw_ui(window, user, font)
     
+    merge_sort_layer_priority(image_layers)
+
+    for layer in image_layers:
+        if layer.type == 'rect':
+            pygame.draw.rect(*layer.parameters)
+        elif layer.type == 'circle':
+            pygame.draw.circle(*layer.parameters)
+        elif layer.type == 'line':
+            pygame.draw.line(*layer.parameters)
+        elif layer.type == 'blit':
+            window.blit(*layer.parameters)
+
     # pygame.display.update()
 
 

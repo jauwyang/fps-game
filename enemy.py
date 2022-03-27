@@ -1,6 +1,6 @@
-from math_tools import Vector2D, distance
+from tools.math_tools import Vector2D, distance
 import pygame
-from config import SCENE_HEIGHT, SCENE_WIDTH, MAP_WIDTH, PLAYABLE_TO_MAP_SCREEN_SCALE, FOV, RED, LIMITED_VISION
+from config import MAP_DIVISION, SCENE_HEIGHT, SCENE_WIDTH, MAP_WIDTH, PLAYABLE_TO_MAP_SCREEN_SCALE, FOV, RED, LIMITED_VISION
 import math
 
 WALK_DELAY = 30
@@ -86,9 +86,9 @@ class Enemy:
     def draw_on_map(self, window, player):
         if LIMITED_VISION:
             if self.is_player_in_view(player):
-                pygame.draw.circle(window, RED, (self.pos.x * PLAYABLE_TO_MAP_SCREEN_SCALE, self.pos.y * PLAYABLE_TO_MAP_SCREEN_SCALE), 10)
+                pygame.draw.circle(window, RED, (self.pos.x * PLAYABLE_TO_MAP_SCREEN_SCALE / MAP_DIVISION, self.pos.y * PLAYABLE_TO_MAP_SCREEN_SCALE / MAP_DIVISION), 10 / MAP_DIVISION)
         else:
-            pygame.draw.circle(window, RED, (self.pos.x * PLAYABLE_TO_MAP_SCREEN_SCALE, self.pos.y * PLAYABLE_TO_MAP_SCREEN_SCALE), 10)
+            pygame.draw.circle(window, RED, (self.pos.x * PLAYABLE_TO_MAP_SCREEN_SCALE / MAP_DIVISION, self.pos.y * PLAYABLE_TO_MAP_SCREEN_SCALE / MAP_DIVISION), 10 / MAP_DIVISION)
 
     def pathfind(self, pathfinder_map, player, window):
         if math.floor(self.get_distance_from_player(player)) >= 15 and self.movement_counter == self.movement_delay:
@@ -110,4 +110,4 @@ class Enemy:
         # print(math.sin(self.movement_direction))
         
         for step in self.path:
-                pygame.draw.circle(window, RED, (step.x * PLAYABLE_TO_MAP_SCREEN_SCALE, step.y * PLAYABLE_TO_MAP_SCREEN_SCALE), 1)
+            pygame.draw.circle(window, RED, (step.x * PLAYABLE_TO_MAP_SCREEN_SCALE / MAP_DIVISION, step.y * PLAYABLE_TO_MAP_SCREEN_SCALE / MAP_DIVISION), 1)

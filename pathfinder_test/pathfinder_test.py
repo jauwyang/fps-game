@@ -1,5 +1,5 @@
 from config import BLUE, MAP_WIDTH, MAP_HEIGHT, BLACK, RED, WHITE
-from math_tools import Vector2D, distance
+from tools.math_tools import Vector2D, distance
 import math
 import pygame
 

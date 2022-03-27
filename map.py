@@ -1,4 +1,4 @@
-from config import MAP_WIDTH, MAP_HEIGHT, PLAYABLE_MAP_SIZE, PLAYABLE_TO_MAP_SCREEN_SCALE, WHITE, BLACK
+from config import MAP_WIDTH, MAP_HEIGHT, PLAYABLE_MAP_SIZE, PLAYABLE_TO_MAP_SCREEN_SCALE, WHITE, BLACK, GREY, MAP_DIVISION
 import pygame
 import math
 
@@ -12,6 +12,7 @@ class Map:
         self.block_height = PLAYABLE_MAP_SIZE / self.m_height
 
     def draw_map(self, window):
+        pygame.draw.rect(window, GREY, (0, 0, (self.m_height-2)*self.block_height/ MAP_DIVISION, (self.m_width - 2)*self.block_width / MAP_DIVISION))
         row_pos = 0
         for row in self.customized_map:
             column_pos = 0
@@ -20,7 +21,7 @@ class Map:
                     colour = BLACK
                 elif column == 1:
                     colour = WHITE
-                pygame.draw.rect(window, colour, (column_pos * self.block_width * PLAYABLE_TO_MAP_SCREEN_SCALE, row_pos * self.block_height * PLAYABLE_TO_MAP_SCREEN_SCALE, self.block_width * PLAYABLE_TO_MAP_SCREEN_SCALE - 1, self.block_height * PLAYABLE_TO_MAP_SCREEN_SCALE - 1))
+                pygame.draw.rect(window, colour, (column_pos * self.block_width * PLAYABLE_TO_MAP_SCREEN_SCALE / MAP_DIVISION, row_pos * self.block_height * PLAYABLE_TO_MAP_SCREEN_SCALE / MAP_DIVISION, (self.block_width * PLAYABLE_TO_MAP_SCREEN_SCALE - 1) / MAP_DIVISION, (self.block_height * PLAYABLE_TO_MAP_SCREEN_SCALE - 1) / MAP_DIVISION))
                 column_pos += 1
             row_pos += 1
 

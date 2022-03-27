@@ -1,5 +1,5 @@
-from config import SCENE_HEIGHT, SCENE_WIDTH, MAP_WIDTH, PLAYABLE_TO_MAP_SCREEN_SCALE, FOV, ENEMY_HITBOX_WIDTH, PISTOL_COOLDOWN
-from math_tools import Vector2D, distance
+from config import SCENE_HEIGHT, SCENE_WIDTH, MAP_WIDTH, PLAYABLE_TO_MAP_SCREEN_SCALE, FOV, ENEMY_HITBOX_WIDTH, PISTOL_COOLDOWN, MAP_DIVISION
+from tools.math_tools import Vector2D, distance
 from raycast import Ray
 import math
 import pygame
@@ -33,8 +33,10 @@ class Player:
         self.pos.y += delta_y
 
     def draw(self, window, map):
-        pygame.draw.circle(window, self.colour, (self.pos.x * PLAYABLE_TO_MAP_SCREEN_SCALE, self.pos.y * PLAYABLE_TO_MAP_SCREEN_SCALE), 5)
-        pygame.draw.line(window, self.colour, (self.pos.x * PLAYABLE_TO_MAP_SCREEN_SCALE, self.pos.y * PLAYABLE_TO_MAP_SCREEN_SCALE), (self.pos.x * PLAYABLE_TO_MAP_SCREEN_SCALE + 30 * math.cos(self.heading), self.pos.y * PLAYABLE_TO_MAP_SCREEN_SCALE + 30 * math.sin(self.heading)))
+        # Draw Circle
+        pygame.draw.circle(window, self.colour, (self.pos.x * PLAYABLE_TO_MAP_SCREEN_SCALE / MAP_DIVISION, self.pos.y * PLAYABLE_TO_MAP_SCREEN_SCALE / MAP_DIVISION), 5)
+        # Draw line
+        # pygame.draw.line(window, self.colour, (self.pos.x * PLAYABLE_TO_MAP_SCREEN_SCALE / MAP_DIVISION, self.pos.y * PLAYABLE_TO_MAP_SCREEN_SCALE / MAP_DIVISION), ((self.pos.x * PLAYABLE_TO_MAP_SCREEN_SCALE + 30 * math.cos(self.heading)) / MAP_DIVISION, (self.pos.y * PLAYABLE_TO_MAP_SCREEN_SCALE + 30 * math.sin(self.heading)) / MAP_DIVISION))
         index = 0
         for ray in self.rays:
             ray.cast(window, map, self.heading)
@@ -76,7 +78,7 @@ class Player:
             else:
                 colour = (150, 150, 150)
 
-            pygame.draw.rect(window, colour, (MAP_WIDTH + ray_x_pos * ray_slice_width, (SCENE_HEIGHT - ray_slice_height) / 2, ray_slice_width, ray_slice_height))
+            pygame.draw.rect(window, colour, (ray_x_pos * ray_slice_width, (SCENE_HEIGHT - ray_slice_height) / 2, ray_slice_width, ray_slice_height))
             ray_x_pos += 1
 
     def shoot(self, window, enemies, keypress):

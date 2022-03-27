@@ -1,7 +1,7 @@
 from config import PLAYABLE_MAP_SIZE
-from math_tools import Vector2D, distance
+from tools.math_tools import Vector2D, distance
 import math
-from tools import printProgressBar
+from tools.tools import printProgressBar
 
 # MAP SCALES
 '''

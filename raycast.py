@@ -1,7 +1,7 @@
-from math_tools import Vector2D, distance
+from tools.math_tools import Vector2D, distance
 import math
 import pygame
-from config import PLAYABLE_TO_MAP_SCREEN_SCALE, FOV, RED, WHITE, BLUE
+from config import PLAYABLE_TO_MAP_SCREEN_SCALE, FOV, RED, WHITE, BLUE, MAP_DIVISION
 
 
 class Ray:
@@ -16,7 +16,7 @@ class Ray:
             self.angle += 2 * math.pi
 
     def draw(self, window):
-        pygame.draw.line(window, WHITE, (self.pos.x * PLAYABLE_TO_MAP_SCREEN_SCALE, self.pos.y * PLAYABLE_TO_MAP_SCREEN_SCALE), (self.pos.x * PLAYABLE_TO_MAP_SCREEN_SCALE + self.dir.x * 100, self.pos.y * PLAYABLE_TO_MAP_SCREEN_SCALE + self.dir.y * 100))
+        pygame.draw.line(window, WHITE, (self.pos.x * PLAYABLE_TO_MAP_SCREEN_SCALE, self.pos.y * PLAYABLE_TO_MAP_SCREEN_SCALE) / MAP_DIVISION, (self.pos.x * PLAYABLE_TO_MAP_SCREEN_SCALE + self.dir.x * 100, self.pos.y * PLAYABLE_TO_MAP_SCREEN_SCALE + self.dir.y * 100) / MAP_DIVISION)
 
     def set_angle(self, angle):
         self.dir = Vector2D(math.cos(angle), math.sin(angle))
@@ -131,7 +131,7 @@ class Ray:
             colour = RED
         else:
             colour = BLUE
-        pygame.draw.line(window, colour, (self.pos.x * PLAYABLE_TO_MAP_SCREEN_SCALE, self.pos.y * PLAYABLE_TO_MAP_SCREEN_SCALE), (shortest_ray_x * PLAYABLE_TO_MAP_SCREEN_SCALE, shortest_ray_y * PLAYABLE_TO_MAP_SCREEN_SCALE))
+        pygame.draw.line(window, colour, (self.pos.x * PLAYABLE_TO_MAP_SCREEN_SCALE / MAP_DIVISION, self.pos.y * PLAYABLE_TO_MAP_SCREEN_SCALE / MAP_DIVISION), (shortest_ray_x * PLAYABLE_TO_MAP_SCREEN_SCALE / MAP_DIVISION, shortest_ray_y * PLAYABLE_TO_MAP_SCREEN_SCALE / MAP_DIVISION))
 
     
 

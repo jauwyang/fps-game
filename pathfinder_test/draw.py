@@ -1,7 +1,7 @@
 from config import SCENE_HEIGHT, SCENE_WIDTH, WINDOW_WIDTH, WINDOW_HEIGHT, MAP_WIDTH, MAP_HEIGHT, GREEN, GREY, CROSSHAIR_LENGTH, CROSSHAIR_WIDTH, CROSSHAIR_COLOUR, ENEMY_NUM
 import pygame
 import math
-from math_tools import Vector2D
+from tools.math_tools import Vector2D
 from pathfinder_test import A_star
 
 # ==== GLOBAL VARIABLES ====
