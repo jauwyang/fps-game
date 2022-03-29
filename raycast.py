@@ -1,3 +1,4 @@
+from pygame_object import PygameImageLayer
 from tools.math_tools import Vector2D, distance
 import math
 import pygame
@@ -15,8 +16,17 @@ class Ray:
         while self.angle < 0:
             self.angle += 2 * math.pi
 
-    def draw(self, window):
-        pygame.draw.line(window, WHITE, (self.pos.x * PLAYABLE_TO_MAP_SCREEN_SCALE, self.pos.y * PLAYABLE_TO_MAP_SCREEN_SCALE) / MAP_DIVISION, (self.pos.x * PLAYABLE_TO_MAP_SCREEN_SCALE + self.dir.x * 100, self.pos.y * PLAYABLE_TO_MAP_SCREEN_SCALE + self.dir.y * 100) / MAP_DIVISION)
+    def draw(self, window, image_layers):
+        # if self.angle == heading:
+        #     colour = RED
+        # else:
+        #     colour = BLUE
+
+        image_parameters = (window, BLUE, (self.pos.x * PLAYABLE_TO_MAP_SCREEN_SCALE / MAP_DIVISION, self.pos.y * PLAYABLE_TO_MAP_SCREEN_SCALE / MAP_DIVISION), (self.endpoint.x * PLAYABLE_TO_MAP_SCREEN_SCALE / MAP_DIVISION, self.endpoint.y * PLAYABLE_TO_MAP_SCREEN_SCALE / MAP_DIVISION))
+        ray_on_map = PygameImageLayer('line', False, image_parameters, 1501)
+        image_layers.append(ray_on_map)
+
+        # pygame.draw.line(window, WHITE, (self.pos.x * PLAYABLE_TO_MAP_SCREEN_SCALE, self.pos.y * PLAYABLE_TO_MAP_SCREEN_SCALE) / MAP_DIVISION, (self.pos.x * PLAYABLE_TO_MAP_SCREEN_SCALE + self.dir.x * 100, self.pos.y * PLAYABLE_TO_MAP_SCREEN_SCALE + self.dir.y * 100) / MAP_DIVISION)
 
     def set_angle(self, angle):
         self.dir = Vector2D(math.cos(angle), math.sin(angle))
@@ -26,7 +36,7 @@ class Ray:
         while self.angle < 0:
             self.angle += 2 * math.pi
 
-    def cast(self, window, map, heading):
+    def cast(self, window, map, heading, image_layers):
         self.shortest_distance = math.inf
 
         # Rounded variables used for comparisons
@@ -127,13 +137,9 @@ class Ray:
         self.length = distance(self.pos.x, self.pos.y, shortest_ray_x, shortest_ray_y)
 
         self.endpoint = Vector2D(shortest_ray_x, shortest_ray_y)
-        if self.angle == heading:
-            colour = RED
-        else:
-            colour = BLUE
-        pygame.draw.line(window, colour, (self.pos.x * PLAYABLE_TO_MAP_SCREEN_SCALE / MAP_DIVISION, self.pos.y * PLAYABLE_TO_MAP_SCREEN_SCALE / MAP_DIVISION), (shortest_ray_x * PLAYABLE_TO_MAP_SCREEN_SCALE / MAP_DIVISION, shortest_ray_y * PLAYABLE_TO_MAP_SCREEN_SCALE / MAP_DIVISION))
 
-    
+        self.draw(window, image_layers)
+
 
     def get_points_in_line(self, points, radius):
         # Narrow Search

@@ -5,6 +5,7 @@ from map import Map
 from enemy import Enemy
 import pygame
 import math
+from pygame_object import PygameImageLayer
 from tools.math_tools import Vector2D
 from tools.merge_sort_layer_priority import merge_sort_layer_priority
 from pathfinder import A_star
@@ -48,59 +49,73 @@ def generate_enemies():
     enemies = []
     for enemy in range(ENEMY_NUM):
         enemies.append(Enemy(500, 300))
+        enemies.append(Enemy(600, 800))
     return enemies
 
 
-def draw_sky(window):
-    pygame.draw.rect(window, (26, 164, 255), (MAP_WIDTH, 0, SCENE_WIDTH, SCENE_HEIGHT / 2))
-    # pygame.draw.rect(window, (0, 255, 0), (MAP_WIDTH, SCENE_HEIGHT / 2, SCENE_WIDTH, SCENE_HEIGHT / 2))
+def draw_sky(window, image_layers):
+    image_parameters = (window, (26, 164, 255), (MAP_WIDTH, 0, SCENE_WIDTH, SCENE_HEIGHT / 2))
+    sky = PygameImageLayer('rect', False, image_parameters, -1)
+    image_layers.append(sky)
 
 
-def draw_ui(window, user, font):
+def draw_ui(window, user, font, image_layers):
+    # UI parameters have priority of 2001+
+    # Blast has a priority of 2000
     # Draw crosshair
-    pygame.draw.rect(window, CROSSHAIR_COLOUR, (MAP_WIDTH + SCENE_WIDTH / 2 - CROSSHAIR_WIDTH / 2, SCENE_HEIGHT / 2 - CROSSHAIR_LENGTH / 2, CROSSHAIR_WIDTH, CROSSHAIR_LENGTH))
-    pygame.draw.rect(window, CROSSHAIR_COLOUR, (MAP_WIDTH + SCENE_WIDTH / 2 - CROSSHAIR_LENGTH / 2, SCENE_HEIGHT / 2 - CROSSHAIR_WIDTH / 2, CROSSHAIR_LENGTH, CROSSHAIR_WIDTH))
+    crosshair_horizontal_params = (window, CROSSHAIR_COLOUR, (MAP_WIDTH + SCENE_WIDTH / 2 - CROSSHAIR_WIDTH / 2, SCENE_HEIGHT / 2 - CROSSHAIR_LENGTH / 2, CROSSHAIR_WIDTH, CROSSHAIR_LENGTH))
+    crosshair_horizontal = PygameImageLayer('rect', False, crosshair_horizontal_params, 2001)
+    image_layers.append(crosshair_horizontal)
+
+    crosshair_vertical_params = (window, CROSSHAIR_COLOUR, (MAP_WIDTH + SCENE_WIDTH / 2 - CROSSHAIR_LENGTH / 2, SCENE_HEIGHT / 2 - CROSSHAIR_WIDTH / 2, CROSSHAIR_LENGTH, CROSSHAIR_WIDTH))
+    crosshair_vertical = PygameImageLayer('rect', False, crosshair_vertical_params, 2001)
+    image_layers.append(crosshair_vertical)
 
     # Draw pistol
-    test = (window, RED, (0, 0), 20)
-    pygame.draw.circle(*test)
-    pistol = pygame.image.load('images/pistol.png')
-    window.blit(pistol, (MAP_WIDTH + SCENE_WIDTH - 300, SCENE_HEIGHT - 320))
+    pistol_image = pygame.image.load('images/pistol.png')
+    pistol_params = (pistol_image, (MAP_WIDTH + SCENE_WIDTH - 300, SCENE_HEIGHT - 320))
+    pistol = PygameImageLayer('blit', False, pistol_params, 2001)
+    image_layers.append(pistol)
+
+    # Animate Shot
+    user.animate_blast(image_layers)
 
     # Draw Ammo
     if user.ammunition == 3:
-        ammo = pygame.image.load('images/ammo_3.png')
+        ammo_image = pygame.image.load('images/ammo_3.png')
     elif user.ammunition == 2:
-        ammo = pygame.image.load('images/ammo_2.png')
+        ammo_image = pygame.image.load('images/ammo_2.png')
     elif user.ammunition == 1:
-        ammo = pygame.image.load('images/ammo_1.png')
+        ammo_image = pygame.image.load('images/ammo_1.png')
     else:
-        ammo = pygame.image.load('images/ammo_0.png')
+        ammo_image = pygame.image.load('images/ammo_0.png')
         # no_ammo = font.render("NO AMMO", 1, RED)
         # window.blit(no_ammo, (MAP_WIDTH + SCENE_WIDTH / 2, SCENE_HEIGHT / 2))
-    ammo = pygame.transform.scale(ammo, (100, 50))
-    window.blit(ammo, (MAP_WIDTH + SCENE_WIDTH - 150, SCENE_HEIGHT - 120))
+    ammo_image = pygame.transform.scale(ammo_image, (100, 50))
+
+    ammo_params = (ammo_image, (MAP_WIDTH + SCENE_WIDTH - 150, SCENE_HEIGHT - 120))
+    ammo = PygameImageLayer('blit', False, ammo_params, 2002)
+    image_layers.append(ammo)
 
 
 def draw_window(window, game_map, user, enemies, font):
 
-    """
-    COMMIT CHANGES BEFORE ACTUALLY IMPLEMENTING NEW IMAGE RENDERING METHOD <<<<<<<
-    """
     window.fill(GREY)
 
     image_layers = []
 
-    draw_sky(window)
+    draw_sky(window, image_layers)
     
-    user.draw(window, game_map)
+    user.draw(window, game_map, image_layers)
 
-    user.draw_scene_walls(window, game_map)
-    game_map.draw_map(window)
+    user.draw_scene_walls(window, game_map, image_layers)
+    # Values for the map go from 0-12 (0-1200), so map will start at 1500
+
+    game_map.draw_map(window, image_layers)
     for enemy in enemies:
-        enemy.draw_on_map(window, user)
-        enemy.draw_on_scene(window, user)
-    draw_ui(window, user, font)
+        enemy.draw_on_map(window, user, image_layers)
+        enemy.draw_on_scene(window, user, image_layers)
+    draw_ui(window, user, font, image_layers)
     
     merge_sort_layer_priority(image_layers)
 
@@ -114,7 +129,7 @@ def draw_window(window, game_map, user, enemies, font):
         elif layer.type == 'blit':
             window.blit(*layer.parameters)
 
-    # pygame.display.update()
+    pygame.display.update()
 
 
 def keyboard_input(window, map, player, enemies, animation_frames):
@@ -154,7 +169,6 @@ def keyboard_input(window, map, player, enemies, animation_frames):
         player.rotate(0.05 * look_multiplier)
 
     # Player shoot  
-    # print(pygame.event.get())
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             return False
@@ -172,10 +186,10 @@ def keyboard_input(window, map, player, enemies, animation_frames):
     return True
 
 
-def update_entities(pathfinder_map, user, enemies, window):
+def update_entities(pathfinder_map, user, enemies):
     # Update position of enemies
     for enemy in enemies:
-        enemy.pathfind(pathfinder_map, user, window)
+        enemy.pathfind(pathfinder_map, user)
 
 
 def init():
@@ -200,7 +214,7 @@ def init():
         #         run = False
         draw_window(window, game_map, user, enemies, font)
         run = keyboard_input(window, game_map, user, enemies, animation_frames)
-        update_entities(pathfinder_map, user, enemies, window)
+        update_entities(pathfinder_map, user, enemies)
         pygame.display.update()
         
 

@@ -1,3 +1,4 @@
+from pygame_object import PygameImageLayer
 from tools.math_tools import Vector2D, distance
 import pygame
 from config import MAP_DIVISION, SCENE_HEIGHT, SCENE_WIDTH, MAP_WIDTH, PLAYABLE_TO_MAP_SCREEN_SCALE, FOV, RED, LIMITED_VISION
@@ -51,7 +52,7 @@ class Enemy:
             (index_of_pointing_ray >= 0 or index_of_pointing_ray < len(player.rays)) and
             (player.rays[index_of_pointing_ray].length >= self.get_distance_from_player(player)))
 
-    def draw_on_scene(self, window, player):
+    def draw_on_scene(self, window, player, image_layers):
         if self.is_player_in_view(player):
             angle_slice = math.ceil(math.degrees(self.get_angle_from_player(player)))
             screen_ray = SCENE_WIDTH / FOV
@@ -75,22 +76,27 @@ class Enemy:
             frame_width = self.key_frame.get_size()[0]
             frame_length = self.key_frame.get_size()[1]
             self.key_frame = pygame.transform.scale(self.key_frame, (int(ray_slice_width)*5, int(ray_slice_height*2)))
-            window.blit(self.key_frame, (MAP_WIDTH + angle_slice * screen_ray - frame_width / 2, (SCENE_HEIGHT - ray_slice_height * 1.5) / 2))
+
+            enemy_parameters = (self.key_frame, (MAP_WIDTH + angle_slice * screen_ray - frame_width / 2, (SCENE_HEIGHT - ray_slice_height * 1.5) / 2))
+            enemy = PygameImageLayer('blit', False, enemy_parameters, 1200 - round(self.get_distance_from_player(player)))
+            image_layers.append(enemy)
+
             self.walk_timer -= 1
 
 
-            # pygame.draw.rect(window, RED, (MAP_WIDTH + angle_slice * screen_ray, (SCENE_HEIGHT - ray_slice_height) / 2, ray_slice_width, ray_slice_height))
-            # enemy = pygame
-            # window.blit()
-
-    def draw_on_map(self, window, player):
+    def draw_on_map(self, window, player, image_layers):
         if LIMITED_VISION:
             if self.is_player_in_view(player):
-                pygame.draw.circle(window, RED, (self.pos.x * PLAYABLE_TO_MAP_SCREEN_SCALE / MAP_DIVISION, self.pos.y * PLAYABLE_TO_MAP_SCREEN_SCALE / MAP_DIVISION), 10 / MAP_DIVISION)
+                enemy_mapview_params = (window, RED, (self.pos.x * PLAYABLE_TO_MAP_SCREEN_SCALE / MAP_DIVISION, self.pos.y * PLAYABLE_TO_MAP_SCREEN_SCALE / MAP_DIVISION), 10 / MAP_DIVISION)
+                enemy_mapview = PygameImageLayer('circle', False, enemy_mapview_params, 1505)
+                image_layers.append(enemy_mapview)
         else:
-            pygame.draw.circle(window, RED, (self.pos.x * PLAYABLE_TO_MAP_SCREEN_SCALE / MAP_DIVISION, self.pos.y * PLAYABLE_TO_MAP_SCREEN_SCALE / MAP_DIVISION), 10 / MAP_DIVISION)
+            enemy_mapview_params = (window, RED, (self.pos.x * PLAYABLE_TO_MAP_SCREEN_SCALE / MAP_DIVISION, self.pos.y * PLAYABLE_TO_MAP_SCREEN_SCALE / MAP_DIVISION), 10 / MAP_DIVISION)
+            enemy_mapview = PygameImageLayer('circle', False, enemy_mapview_params, 1505)
+            image_layers.append(enemy_mapview)
 
-    def pathfind(self, pathfinder_map, player, window):
+
+    def pathfind(self, pathfinder_map, player):
         if math.floor(self.get_distance_from_player(player)) >= 15 and self.movement_counter == self.movement_delay:
             self.path = pathfinder_map.search(self.pos, player.pos)
 
@@ -109,5 +115,8 @@ class Enemy:
         # print(math.cos(self.movement_direction))
         # print(math.sin(self.movement_direction))
         
+    def draw_path(self, window, image_layers):
         for step in self.path:
-            pygame.draw.circle(window, RED, (step.x * PLAYABLE_TO_MAP_SCREEN_SCALE / MAP_DIVISION, step.y * PLAYABLE_TO_MAP_SCREEN_SCALE / MAP_DIVISION), 1)
+            pathfinder_trail_params = (window, RED, (step.x * PLAYABLE_TO_MAP_SCREEN_SCALE / MAP_DIVISION, step.y * PLAYABLE_TO_MAP_SCREEN_SCALE / MAP_DIVISION), 1)
+            pathfinder_trail = PygameImageLayer('circle', False, pathfinder_trail_params, 1510)
+            image_layers.append(pathfinder_trail)

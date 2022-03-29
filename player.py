@@ -1,4 +1,5 @@
 from config import SCENE_HEIGHT, SCENE_WIDTH, MAP_WIDTH, PLAYABLE_TO_MAP_SCREEN_SCALE, FOV, ENEMY_HITBOX_WIDTH, PISTOL_COOLDOWN, MAP_DIVISION
+from pygame_object import PygameImageLayer
 from tools.math_tools import Vector2D, distance
 from raycast import Ray
 import math
@@ -14,6 +15,7 @@ class Player:
         self.can_shoot = True
         self.ammunition = 3
         self.main_ray_distance = 0
+        self.animate_shot = False
         for angle in range(round(-FOV / 2), round(FOV / 2)):
             self.rays.append(Ray(self.pos, math.radians(angle)))
             if angle == self.heading:
@@ -32,14 +34,16 @@ class Player:
         self.pos.x += delta_x
         self.pos.y += delta_y
 
-    def draw(self, window, map):
-        # Draw Circle
-        pygame.draw.circle(window, self.colour, (self.pos.x * PLAYABLE_TO_MAP_SCREEN_SCALE / MAP_DIVISION, self.pos.y * PLAYABLE_TO_MAP_SCREEN_SCALE / MAP_DIVISION), 5)
-        # Draw line
-        # pygame.draw.line(window, self.colour, (self.pos.x * PLAYABLE_TO_MAP_SCREEN_SCALE / MAP_DIVISION, self.pos.y * PLAYABLE_TO_MAP_SCREEN_SCALE / MAP_DIVISION), ((self.pos.x * PLAYABLE_TO_MAP_SCREEN_SCALE + 30 * math.cos(self.heading)) / MAP_DIVISION, (self.pos.y * PLAYABLE_TO_MAP_SCREEN_SCALE + 30 * math.sin(self.heading)) / MAP_DIVISION))
+    def draw(self, window, map, image_layers):
+        # Draw Circle on map
+        player_location_params = (window, self.colour, (self.pos.x * PLAYABLE_TO_MAP_SCREEN_SCALE / MAP_DIVISION, self.pos.y * PLAYABLE_TO_MAP_SCREEN_SCALE / MAP_DIVISION), 5)
+        player_location = PygameImageLayer('circle', False, player_location_params, 1502)
+        image_layers.append(player_location)
+        
+        # Draw player rays on map
         index = 0
         for ray in self.rays:
-            ray.cast(window, map, self.heading)
+            ray.cast(window, map, self.heading, image_layers)
             if index == self.main_ray_index:
                 self.main_ray_distance = ray.length
             index += 1
@@ -54,7 +58,7 @@ class Player:
                 points_seen.append(point)
         return points_seen
 
-    def draw_scene_walls(self, window, map):
+    def draw_scene_walls(self, window, map, image_layers):
         ray_x_pos = 0
         for ray in self.rays:
             # Fix fish-eye effect
@@ -78,7 +82,10 @@ class Player:
             else:
                 colour = (150, 150, 150)
 
-            pygame.draw.rect(window, colour, (ray_x_pos * ray_slice_width, (SCENE_HEIGHT - ray_slice_height) / 2, ray_slice_width, ray_slice_height))
+            wall_params = (window, colour, (ray_x_pos * ray_slice_width, (SCENE_HEIGHT - ray_slice_height) / 2, ray_slice_width, ray_slice_height))
+            wall = PygameImageLayer('rect', False, wall_params, (1200 - round(ray.shortest_distance)))
+            image_layers.append(wall)
+
             ray_x_pos += 1
 
     def shoot(self, window, enemies, keypress):
@@ -94,8 +101,8 @@ class Player:
 
         self.can_shoot = False
         self.ammunition -= 1
-        blast = pygame.image.load('images/blast.png')
-        window.blit(blast, (MAP_WIDTH + SCENE_WIDTH - 700, SCENE_HEIGHT - 600))
+        self.animate_shot = True
+        # window.blit(blast, (MAP_WIDTH + SCENE_WIDTH - 700, SCENE_HEIGHT - 600))
 
         # Test collision
         line_of_sight = self.rays[self.main_ray_index]
@@ -114,3 +121,13 @@ class Player:
         
         self.ammunition = 3
         self.can_shoot = True
+
+    def animate_blast(self, image_layers):
+        if self.animate_shot == False:
+            return
+
+        blast_image = pygame.image.load('images/blast.png')
+        blast_params = (blast_image, (MAP_WIDTH + SCENE_WIDTH - 700, SCENE_HEIGHT - 600))
+        blast = PygameImageLayer('blit', False, blast_params, 2000)
+        image_layers.append(blast)
+        self.animate_shot = False

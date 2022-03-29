@@ -2,6 +2,8 @@ from config import MAP_WIDTH, MAP_HEIGHT, PLAYABLE_MAP_SIZE, PLAYABLE_TO_MAP_SCR
 import pygame
 import math
 
+from pygame_object import PygameImageLayer
+
 
 class Map:
     def __init__(self, map):
@@ -11,8 +13,11 @@ class Map:
         self.block_width = PLAYABLE_MAP_SIZE / self.m_width
         self.block_height = PLAYABLE_MAP_SIZE / self.m_height
 
-    def draw_map(self, window):
-        pygame.draw.rect(window, GREY, (0, 0, (self.m_height-2)*self.block_height/ MAP_DIVISION, (self.m_width - 2)*self.block_width / MAP_DIVISION))
+    def draw_map(self, window, image_layers):
+        map_background_params = (window, GREY, (0, 0, (self.m_height-2)*self.block_height/ MAP_DIVISION, (self.m_width - 2)*self.block_width / MAP_DIVISION))
+        map_background = PygameImageLayer('rect', False, map_background_params, 1500)
+        image_layers.append(map_background)
+
         row_pos = 0
         for row in self.customized_map:
             column_pos = 0
@@ -21,7 +26,11 @@ class Map:
                     colour = BLACK
                 elif column == 1:
                     colour = WHITE
-                pygame.draw.rect(window, colour, (column_pos * self.block_width * PLAYABLE_TO_MAP_SCREEN_SCALE / MAP_DIVISION, row_pos * self.block_height * PLAYABLE_TO_MAP_SCREEN_SCALE / MAP_DIVISION, (self.block_width * PLAYABLE_TO_MAP_SCREEN_SCALE - 1) / MAP_DIVISION, (self.block_height * PLAYABLE_TO_MAP_SCREEN_SCALE - 1) / MAP_DIVISION))
+
+                map_block_params = (window, colour, (column_pos * self.block_width * PLAYABLE_TO_MAP_SCREEN_SCALE / MAP_DIVISION, row_pos * self.block_height * PLAYABLE_TO_MAP_SCREEN_SCALE / MAP_DIVISION, (self.block_width * PLAYABLE_TO_MAP_SCREEN_SCALE - 1) / MAP_DIVISION, (self.block_height * PLAYABLE_TO_MAP_SCREEN_SCALE - 1) / MAP_DIVISION))
+                map_block = PygameImageLayer('rect', False, map_block_params, 1501)  # 1500 can be the same since none of the blocks on the map will be overlapping
+                image_layers.append(map_block)
+ 
                 column_pos += 1
             row_pos += 1
 
