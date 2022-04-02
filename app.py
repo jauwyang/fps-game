@@ -21,6 +21,7 @@ FPS = 60
 # TODO: fix enemy sometimes clipping directly through wall
 # TODO: add title screen and death screen
 # TODO (maybe): make player have limited ammo with ammo drops around the map (to force the player to move around) - also make player get 1 bullet back per kill
+# TODO --- quick --- : fix generate enemies
 
 # ===== MAP =====
 # map = [
