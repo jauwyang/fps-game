@@ -15,6 +15,13 @@ import random
 CLOCK = pygame.time.Clock()
 FPS = 60
 
+# ========= The TODO list ==========
+# TODO: add point system (+100 per kill) where points tracked and shown beneath the map
+# TODO: add sounds for when player shoots and hits enemy
+# TODO: fix enemy sometimes clipping directly through wall
+# TODO: add title screen and death screen
+# TODO (maybe): make player have limited ammo with ammo drops around the map (to force the player to move around) - also make player get 1 bullet back per kill
+
 # ===== MAP =====
 # map = [
 #     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
