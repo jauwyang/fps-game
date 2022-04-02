@@ -14,7 +14,7 @@ class Enemy:
         self.movement_delay = 15
         self.movement_counter = 15
         self.movement_direction = 0
-        self.speed = 0.8
+        self.speed = 1.5
 
         self.key_frame = None
         self.key_frame_type = 1
@@ -99,9 +99,13 @@ class Enemy:
     def pathfind(self, pathfinder_map, player):
         if math.floor(self.get_distance_from_player(player)) >= 15 and self.movement_counter == self.movement_delay:
             self.path = pathfinder_map.search(self.pos, player.pos)
-
-            self.movement_direction = math.atan2(self.path[3].y - self.pos.y, self.path[3].x - self.pos.x)
-            
+            if len(self.path) >= 3:
+                self.movement_direction = math.atan2(self.path[3].y - self.pos.y, self.path[3].x - self.pos.x)
+            elif len(self.path) == 2:
+                self.movement_direction = math.atan2(self.path[2].y - self.pos.y, self.path[2].x - self.pos.x)
+            else:
+                print("YOUR DED")
+                
             if self.movement_direction < 0:
                 self.movement_direction += 2*math.pi
             # print(math.degrees(self.movement_direction))

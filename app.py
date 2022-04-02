@@ -1,14 +1,15 @@
 from imp import reload
-from config import SCENE_HEIGHT, SCENE_WIDTH, WINDOW_WIDTH, WINDOW_HEIGHT, MAP_WIDTH, MAP_HEIGHT, GREEN, GREY, CROSSHAIR_LENGTH, CROSSHAIR_WIDTH, CROSSHAIR_COLOUR, ENEMY_NUM, RED
+from config import MAX_ENEMIES, SCENE_HEIGHT, SCENE_WIDTH, WINDOW_WIDTH, WINDOW_HEIGHT, MAP_WIDTH, MAP_HEIGHT, GREEN, GREY, CROSSHAIR_LENGTH, CROSSHAIR_WIDTH, CROSSHAIR_COLOUR, ENEMY_NUM, RED
 from player import Player
 from map import Map
 from enemy import Enemy
 import pygame
 import math
 from pygame_object import PygameImageLayer
-from tools.math_tools import Vector2D
+from tools.math_tools import Vector2D, distance
 from tools.merge_sort_layer_priority import merge_sort_layer_priority
 from pathfinder import A_star
+import random
 
 # ==== GLOBAL VARIABLES ====
 CLOCK = pygame.time.Clock()
@@ -30,19 +31,34 @@ FPS = 60
 #     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
 # ]
 
+# map = [
+#     [0, 0, 0, 1, 1, 0, 0, 1, 1, 1, 1, 1],
+#     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+#     [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+#     [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+#     [1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+#     [1, 0, 1, 0, 0, 0, 0, 0, 1, 1, 0, 1],
+#     [1, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1],
+#     [1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1],
+#     [1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1],
+#     [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+#     [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+#     [1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 0, 0]
+# ]
+
 map = [
-    [1, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 1],
-    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-    [1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-    [1, 0, 1, 0, 0, 0, 0, 0, 1, 1, 0, 1],
-    [1, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1],
-    [1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1],
-    [1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1],
-    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-    [1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 0, 0]
+    [0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0],
+    [0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0],
+    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0],
+    [0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 1],
+    [0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 1],
+    [0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0],
+    [0, 0, 1, 0, 0, 0, 0, 1, 1, 1, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
 ]
 
 def generate_enemies():
@@ -190,6 +206,18 @@ def update_entities(pathfinder_map, user, enemies):
     # Update position of enemies
     for enemy in enemies:
         enemy.pathfind(pathfinder_map, user)
+    
+    # Respawn enemies
+    while len(enemies) < MAX_ENEMIES:
+        found_vacant_spot = False
+        while not found_vacant_spot:
+            x_spawn_on_map_index = random.randint(0, len(map[0]) - 1)
+            y_spawn_on_map_index = random.randint(0, len(map) - 1)
+            x_spawn = x_spawn_on_map_index * 100 - 50
+            y_spawn = y_spawn_on_map_index * 100 - 50
+            if map[y_spawn_on_map_index][x_spawn_on_map_index] == 0 and distance(user.pos.x, user.pos.y, x_spawn, y_spawn) > 600:
+                enemies.append(Enemy(x_spawn, y_spawn))
+                found_vacant_spot = True
 
 
 def init():

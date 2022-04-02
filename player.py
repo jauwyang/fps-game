@@ -1,10 +1,11 @@
+from tabnanny import check
 from config import SCENE_HEIGHT, SCENE_WIDTH, MAP_WIDTH, PLAYABLE_TO_MAP_SCREEN_SCALE, FOV, ENEMY_HITBOX_WIDTH, PISTOL_COOLDOWN, MAP_DIVISION
 from pygame_object import PygameImageLayer
 from tools.math_tools import Vector2D, distance
 from raycast import Ray
 import math
 import pygame
-
+from textures import checkerboard
 
 class Player:
     def __init__(self, x, y, colour):
@@ -70,12 +71,30 @@ class Player:
             ray.shortest_distance *= math.cos(ray_angle_difference)
             if ray.shortest_distance == 0:
                 ray.shortest_distance = 1
+
             # Determine wall slice dimensions
             ray_slice_height = (SCENE_HEIGHT * map.block_width) / ray.shortest_distance
             ray_slice_width = SCENE_WIDTH / FOV
-            if ray_slice_height > SCENE_HEIGHT:
-                ray_slice_height = SCENE_HEIGHT
+            # if ray_slice_height > SCENE_HEIGHT:  # upda
+            #     ray_slice_height = SCENE_HEIGHT
 
+            # # Determine Shade
+            # if ray.horizontal_wall:
+            #     shade = 1
+            # else:
+            #     shade = 0.5
+
+            # pixel_height = ray_slice_height / 32
+            # x_pixel_iterator = (ray.endpoint.x / 3) % 32
+            # for y_pixel_iterator in range(32):
+            #     texture_colour_value = checkerboard[y_pixel_iterator * 32 + int(x_pixel_iterator)] * shade
+            #     colour = (texture_colour_value * 255, texture_colour_value * 255, texture_colour_value * 255)
+            #     wall_pixel_params = (window, colour, (ray_x_pos * ray_slice_width, (SCENE_HEIGHT - ray_slice_height) / 2 + y_pixel_iterator * pixel_height, ray_slice_width, pixel_height + 1))  # added +1 to pixel height to account for offset?
+            #     wall_pixel = PygameImageLayer('rect', False, wall_pixel_params, (1200 - round(ray.shortest_distance)))
+            #     image_layers.append(wall_pixel)
+
+
+            # OLD ======
             # Determine shade
             if ray.horizontal_wall:
                 colour = (255, 255, 255)
